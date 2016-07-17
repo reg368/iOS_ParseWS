@@ -1,0 +1,11 @@
+*.DS_Store
+AppDelegate.h
+AppDelegate.m
+Assets.xcassets/
+Base.lproj/
+Info.plist
+main.m
+ResultController.h
+ResultController.m
+ViewController.h
+ViewController.m
