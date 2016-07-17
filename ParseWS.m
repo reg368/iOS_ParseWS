@@ -129,7 +129,6 @@
         
         
         if(data){
-            NSLog(@"data is not nil");
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
                 NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
                 
@@ -141,7 +140,6 @@
                 
             });
         }else{
-            NSLog(@"data is nil");
             if([_delegate respondsToSelector:@selector(parseWS:completeParseWithData:error:)]){
                 [_delegate parseWS:self completeParseWithData:nil error:error];
             }
