@@ -13,6 +13,7 @@
 @property (nonatomic,strong) NSURLSession *globalSession;
 @property (nonatomic,strong) NSURLSessionDataTask *globaldataTask;
 @property (nonatomic,strong) XMLDictionaryParser *xmlParser;
+@property (nonatomic,strong) UIActivityIndicatorView *activityIndicatorView;
 @end
 
 @implementation ParseWS
@@ -25,8 +26,16 @@
     return _globalSession;
 }
 
+-(UIActivityIndicatorView*)activityIndicatorView{
+    if(!_activityIndicatorView){
+        _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    }
+    return _activityIndicatorView;
+}
 
 - (void)fetchRequestWithURL:(NSURL*)url WsReturnType:(ParseWSReturnType)type Complete:(void(^)(NSObject *, NSError *))complete{
+    
+    [self showActivityIndicatorView];
     
     NSURLSession *session = [NSURLSession sharedSession];
     
@@ -40,6 +49,7 @@
                         case ParseWSReturnJson:{
                             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
                             dispatch_async(dispatch_get_main_queue(),^{
+                                [self stopActivityIndicatorView];
                                 complete(json,error);
                             });
                         }
@@ -48,12 +58,14 @@
                             self.xmlParser = [XMLDictionaryParser sharedInstance];
                             NSDictionary *xml = [self.xmlParser dictionaryWithData:data];
                             dispatch_async(dispatch_get_main_queue(),^{
+                                [self stopActivityIndicatorView];
                                 complete(xml,error);
                             });
                         }
                             break;
                         case ParseWSReturnData:{
                             dispatch_async(dispatch_get_main_queue(),^{
+                                [self stopActivityIndicatorView];
                                 complete(data,error);
                             });
                         }
@@ -64,8 +76,10 @@
                     
                     
                 });
-            }else
+            }else{
+                [self stopActivityIndicatorView];
                 complete(nil,error);
+            }
 
     }];
     
@@ -74,6 +88,8 @@
 }
 
 -(void)postRequestWithURL:(NSURL*)url andPostDict:(NSDictionary*)dict Complete:(void(^)(NSDictionary*,NSError*))complete{
+    
+    [self showActivityIndicatorView];
     
     NSError *error;
     
@@ -103,13 +119,16 @@
                 NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
                 
                 dispatch_async(dispatch_get_main_queue(),^{
+                    [self stopActivityIndicatorView];
                     complete(json,error);
                 });
                 
             });
         
-        }else
+        }else{
+            [self stopActivityIndicatorView];
             complete(nil,error);
+        }
         
     }];
 
@@ -249,6 +268,16 @@
     
 }
 
+-(void)showActivityIndicatorView{
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    self.activityIndicatorView.frame = [[window subviews] objectAtIndex:0].frame;
+    [[[window subviews] objectAtIndex:0] addSubview:self.activityIndicatorView];
+    [self.activityIndicatorView startAnimating];
+}
 
+-(void)stopActivityIndicatorView{
+    [self.activityIndicatorView stopAnimating];
+    [self.activityIndicatorView removeFromSuperview];
+}
 
 @end
