@@ -7,10 +7,12 @@
 //
 
 #import "ParseWS.h"
+#import "XMLDictionary.h"
 
 @interface ParseWS()
 @property (nonatomic,strong) NSURLSession *globalSession;
 @property (nonatomic,strong) NSURLSessionDataTask *globaldataTask;
+@property (nonatomic,strong) XMLDictionaryParser *xmlParser;
 @end
 
 @implementation ParseWS
@@ -24,7 +26,7 @@
 }
 
 
-- (void)fetchRequestWithURL:(NSURL*)url Complete:(void(^)(NSDictionary *, NSError *))complete{
+- (void)fetchRequestWithURL:(NSURL*)url WsReturnType:(ParseWSReturnType)type Complete:(void(^)(NSObject *, NSError *))complete{
     
     NSURLSession *session = [NSURLSession sharedSession];
     
@@ -34,11 +36,32 @@
             if(data){
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
                     
-                    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                    switch (type) {
+                        case ParseWSReturnJson:{
+                            NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                            dispatch_async(dispatch_get_main_queue(),^{
+                                complete(json,error);
+                            });
+                        }
+                            break;
+                        case ParseWSReturnXml:{
+                            self.xmlParser = [XMLDictionaryParser sharedInstance];
+                            NSDictionary *xml = [self.xmlParser dictionaryWithData:data];
+                            dispatch_async(dispatch_get_main_queue(),^{
+                                complete(xml,error);
+                            });
+                        }
+                            break;
+                        case ParseWSReturnData:{
+                            dispatch_async(dispatch_get_main_queue(),^{
+                                complete(data,error);
+                            });
+                        }
+                            break;
+                        default:
+                            break;
+                    }
                     
-                    dispatch_async(dispatch_get_main_queue(),^{
-                        complete(json,error);
-                    });
                     
                 });
             }else
@@ -119,7 +142,7 @@
 
 
 
-- (void)fetchRequestWithURL:(NSURL*)url{
+- (void)fetchRequestWithURL:(NSURL*)url {
     
    if(self.globaldataTask && (self.globaldataTask.state == NSURLSessionTaskStateRunning || self.globaldataTask.state == NSURLSessionTaskStateSuspended))
         [self.globaldataTask cancel];
@@ -196,7 +219,7 @@
 }
 
 
-- (void)fetchImageWithURL:(NSURL*)url{
+- (void)fetchImageWithURL:(NSURL*)url {
     
     if(self.globaldataTask && (self.globaldataTask.state == NSURLSessionTaskStateRunning || self.globaldataTask.state == NSURLSessionTaskStateSuspended))
         [self.globaldataTask cancel];

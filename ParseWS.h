@@ -9,6 +9,12 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+typedef NS_ENUM(NSInteger,ParseWSReturnType) {
+    ParseWSReturnJson,
+    ParseWSReturnXml,
+    ParseWSReturnData,
+};
+
 @protocol ParseWSDelegate;
 
 @interface ParseWS : NSObject <NSURLSessionDelegate>
@@ -17,12 +23,12 @@
 /**
  *   GET request with complete block handle call back method
  */
-- (void)fetchRequestWithURL:(NSURL*)url Complete:(void(^)(NSDictionary *, NSError *))complete;
+- (void)fetchRequestWithURL:(NSURL*)url WsReturnType:(ParseWSReturnType)type Complete:(void(^)(NSObject *, NSError *))complete;
 
 /**
  *   post request with complete block handle call back method
  */
-- (void)postRequestWithURL:(NSURL*)url andPostDict:(NSDictionary*)dict Complete:(void(^)(NSDictionary*,NSError*))complete;
+-(void)postRequestWithURL:(NSURL*)url andPostDict:(NSDictionary*)dict Complete:(void(^)(NSDictionary*,NSError*))complete;
 
 /**
  *   fetch Image request with complete block handle call back method
