@@ -15,6 +15,10 @@ typedef NS_ENUM(NSInteger,ParseWSReturnType) {
     ParseWSReturnData,
 };
 
+typedef void(^fetchRequestWithURLComplete) (NSObject *data , NSError *error);
+typedef void(^postRequestWithURLCompelte) (NSDictionary* dict , NSError *error);
+typedef void(^fetchImageWithURL) (UIImage *image , NSError *error);
+
 @protocol ParseWSDelegate;
 
 @interface ParseWS : NSObject <NSURLSessionDelegate>
@@ -23,17 +27,17 @@ typedef NS_ENUM(NSInteger,ParseWSReturnType) {
 /**
  *   GET request with complete block handle call back method
  */
-- (void)fetchRequestWithURL:(NSURL*)url WsReturnType:(ParseWSReturnType)type Complete:(void(^)(NSObject *, NSError *))complete;
+- (void)fetchRequestWithURL:(NSURL*)url WsReturnType:(ParseWSReturnType)type Complete: (fetchRequestWithURLComplete) complete;
 
 /**
  *   post request with complete block handle call back method
  */
--(void)postRequestWithURL:(NSURL*)url andPostDict:(NSDictionary*)dict Complete:(void(^)(NSDictionary*,NSError*))complete;
+-(void)postRequestWithURL:(NSURL*)url andPostDict:(NSDictionary*)dict Complete:(postRequestWithURLCompelte) complete;
 
 /**
  *   fetch Image request with complete block handle call back method
  */
-- (void)fetchImageWithURL:(NSURL*)url Callback:(void(^)(UIImage * , NSError *))complete;
+- (void)fetchImageWithURL:(NSURL*)url Callback:(fetchImageWithURL) complete;
 
 /**
  *   GET request with ParseWSDelegate - completeParseWithData handle call back method
