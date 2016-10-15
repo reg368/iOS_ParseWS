@@ -9,3 +9,8 @@ ResultController.h
 ResultController.m
 ViewController.h
 ViewController.m
+*.xml
+XMLWriter.h
+XMLWriter.m
+XMLReader.h
+XMLReader.m
