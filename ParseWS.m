@@ -242,23 +242,36 @@
     [request setHTTPMethod:@"POST"];
     
     
-    NSString *parameters = @"";
-    for(NSString *key in dict){
+    NSString *postValue = @"";
+    for(NSString *key in [dict allKeys]){
         
-        NSString *parameter = [NSString stringWithFormat:@"%@=%@",key,[dict objectForKey:key]];
+        if(urlEncode){
+            /*
+             * url encode & application/x-www-form-urlencoded 順序要照下列步驟
+             * 先將 value encode
+             * 在將 key & value 串起來
+             * 再將 key & value 串起來的字串encode
+             */
+            NSString *value = [[dict objectForKey:key] stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+            
+            NSString *parameter = [NSString stringWithFormat:@"%@=%@%@",key,value,@"&"];
+            
+            parameter = [parameter stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+            
+            postValue = [postValue stringByAppendingString:parameter];
+        }else{
+            
+            NSString *parameter = [NSString stringWithFormat:@"%@=%@%@",key,[dict objectForKey:key],@"&"];
+            postValue = [postValue stringByAppendingString:parameter];
+            
+        }
         
-        [parameters stringByAppendingString:[NSString stringWithFormat:@"%@%@",parameter,@"&"]];
-        
-    }
-    
-    if(urlEncode){
-        parameters = [parameters stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
     }
     
     
     NSMutableData *postBody = [NSMutableData data];
     
-    [postBody appendData:[parameters dataUsingEncoding:NSUTF8StringEncoding]];
+    [postBody appendData:[postValue dataUsingEncoding:NSUTF8StringEncoding]];
     [request setHTTPBody:postBody];
     
     
@@ -308,6 +321,7 @@
         
     }];
     [postDataTask resume];
+
 }
 
 
